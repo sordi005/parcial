@@ -1,6 +1,7 @@
+from typing import List
 from fastapi import HTTPException, status
 from app.uow import UnitOfWork
-from app.schemas.ingrediente import IngredienteCreate, IngredienteUpdate, IngredienteRead, IngredienteListResponse
+from app.schemas.ingrediente import IngredienteCreate, IngredienteUpdate, IngredienteRead
 
 
 class IngredienteService:
@@ -9,14 +10,10 @@ class IngredienteService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> IngredienteListResponse:
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[IngredienteRead]:
         with self.uow as uow:
             items = uow.ingredientes.get_all(skip=skip, limit=limit)
-            total = uow.ingredientes.count()
-            return IngredienteListResponse(
-                total=total,
-                items=[IngredienteRead.model_validate(i) for i in items]
-            )
+            return [IngredienteRead.model_validate(i) for i in items]
 
     def get_by_id(self, ingrediente_id: int) -> IngredienteRead:
         with self.uow as uow:

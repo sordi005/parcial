@@ -1,8 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import HTTPException, status
 from app.uow import UnitOfWork
-from app.models.producto import Producto
-from app.schemas.producto import ProductoCreate, ProductoUpdate, ProductoRead, ProductoListResponse
+from app.schemas.producto import ProductoCreate, ProductoUpdate, ProductoRead
 
 
 class ProductoService:
@@ -11,13 +10,12 @@ class ProductoService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, skip: int = 0, limit: int = 100, categoria_id: Optional[int] = None) -> ProductoListResponse:
+    def get_all(self, skip: int = 0, limit: int = 100, categoria_id: Optional[int] = None) -> List[ProductoRead]:
         with self.uow as uow:
             productos = uow.productos.get_all(skip=skip, limit=limit, categoria_id=categoria_id)
-            total = uow.productos.count(categoria_id=categoria_id)
             # build_producto_read ya devuelve un schema (ProductoRead), no un modelo
             items = [uow.productos.build_producto_read(p) for p in productos]
-            return ProductoListResponse(total=total, items=items)
+            return items
 
     def get_by_id(self, producto_id: int) -> ProductoRead:
         with self.uow as uow:
