@@ -241,7 +241,7 @@ DEBUG=False
 **Frontend (editar `frontend/src/api/client.ts`)**:
 ```typescript
 export const apiClient = axios.create({
-  baseURL: 'https://api.tudominio.com/api/v1',  // URL de producción
+  baseURL: 'https://api.tudominio.com/api',  // URL de producción
 });
 ```
 

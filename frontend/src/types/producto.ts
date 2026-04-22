@@ -11,7 +11,7 @@ export interface Producto {
   id: number;
   nombre: string;
   descripcion: string | null;
-  precio: number;
+  precio: number | string; // Puede venir como número o string del backend
   disponible: boolean;
   created_at: string;
   categorias: Categoria[];

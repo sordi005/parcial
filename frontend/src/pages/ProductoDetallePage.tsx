@@ -61,7 +61,7 @@ export const ProductoDetallePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div className="bg-blue-50 rounded-lg p-6">
             <p className="text-sm font-semibold text-gray-600 mb-2">PRECIO</p>
-            <p className="text-4xl font-bold text-blue-600">${producto.precio.toFixed(2)}</p>
+            <p className="text-4xl font-bold text-blue-600">${typeof producto.precio === 'string' ? parseFloat(producto.precio).toFixed(2) : producto.precio.toFixed(2)}</p>
           </div>
 
           <div className="bg-purple-50 rounded-lg p-6">

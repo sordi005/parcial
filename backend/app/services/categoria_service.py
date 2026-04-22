@@ -1,6 +1,7 @@
+from typing import List
 from fastapi import HTTPException, status
 from app.uow import UnitOfWork
-from app.schemas.categoria import CategoriaCreate, CategoriaUpdate, CategoriaRead, CategoriaListResponse
+from app.schemas.categoria import CategoriaCreate, CategoriaUpdate, CategoriaRead
 
 
 class CategoriaService:
@@ -9,15 +10,11 @@ class CategoriaService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> CategoriaListResponse:
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[CategoriaRead]:
         with self.uow as uow:
             items = uow.categorias.get_all(skip=skip, limit=limit)
-            total = uow.categorias.count()
             # Convertir a schema DENTRO del with, mientras la sesión está abierta
-            return CategoriaListResponse(
-                total=total,
-                items=[CategoriaRead.model_validate(c) for c in items]
-            )
+            return [CategoriaRead.model_validate(c) for c in items]
 
     def get_by_id(self, categoria_id: int) -> CategoriaRead:
         with self.uow as uow:

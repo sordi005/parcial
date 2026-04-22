@@ -15,7 +15,9 @@ export const ProductoForm = ({ onSubmit, initialData, isLoading = false }: Props
 
   const [nombre, setNombre] = useState(initialData?.nombre || '');
   const [descripcion, setDescripcion] = useState(initialData?.descripcion || '');
-  const [precio, setPrecio] = useState(initialData?.precio || 0);
+  const [precio, setPrecio] = useState(
+    initialData?.precio ? Number(initialData.precio) : 0
+  );
   const [disponible, setDisponible] = useState(initialData?.disponible ?? true);
   const [selectedCategorias, setSelectedCategorias] = useState<number[]>(
     initialData?.categorias.map(c => c.id) || []
@@ -60,7 +62,7 @@ export const ProductoForm = ({ onSubmit, initialData, isLoading = false }: Props
     onSubmit({
       nombre: nombre.trim(),
       descripcion: descripcion.trim() || undefined,
-      precio,
+      precio: Number(precio),
       disponible,
       categoria_ids: selectedCategorias,
       ingredientes,

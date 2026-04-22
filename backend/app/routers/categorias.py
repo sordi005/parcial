@@ -1,13 +1,13 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Query, Path, status, Depends
 from app.uow import UnitOfWork, get_uow
-from app.schemas.categoria import CategoriaCreate, CategoriaRead, CategoriaUpdate, CategoriaListResponse
+from app.schemas.categoria import CategoriaCreate, CategoriaRead, CategoriaUpdate
 from app.services.categoria_service import CategoriaService
 
 router = APIRouter(prefix="/api/categorias", tags=["categorias"])
 
 
-@router.get("", response_model=CategoriaListResponse)
+@router.get("", response_model=List[CategoriaRead])
 def get_categorias(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 100,
