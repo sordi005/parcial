@@ -3,9 +3,9 @@ import { apiClient } from '../api/client';
 import type { Producto, ProductoCreate, ProductoUpdate } from '../types';
 
 // GET listado con filtro opcional
-export const useProductos = (categoriaId?: number) => {
+export const useProductos = (categoriaId?: number | null) => {
   return useQuery<Producto[]>({
-    queryKey: ['productos', categoriaId],
+    queryKey: ['productos', categoriaId ?? undefined],
     queryFn: async () => {
       const params = categoriaId ? { categoria_id: categoriaId } : {};
       const { data } = await apiClient.get<Producto[]>('/productos', { params });
