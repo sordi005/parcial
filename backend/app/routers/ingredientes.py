@@ -1,13 +1,13 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Query, Path, status, Depends
 from app.uow import UnitOfWork, get_uow
-from app.schemas.ingrediente import IngredienteCreate, IngredienteRead, IngredienteUpdate, IngredienteListResponse
+from app.schemas.ingrediente import IngredienteCreate, IngredienteRead, IngredienteUpdate
 from app.services.ingrediente_service import IngredienteService
 
 router = APIRouter(prefix="/api/ingredientes", tags=["ingredientes"])
 
 
-@router.get("", response_model=IngredienteListResponse)
+@router.get("", response_model=List[IngredienteRead])
 def get_ingredientes(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 100,
