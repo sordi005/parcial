@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from decimal import Decimal
+from pydantic import field_validator, field_serializer
 from sqlmodel import SQLModel, Field
 from app.schemas.categoria import CategoriaRead
 
@@ -46,8 +47,7 @@ class ProductoRead(ProductoBase):
     categorias: List[CategoriaRead]
     ingredientes: List[ProductoIngredienteRead]
 
-
-class ProductoListResponse(SQLModel):
-    """Respuesta paginada para productos"""
-    total: int
-    items: List[ProductoRead]
+    @field_serializer('precio')
+    def serialize_precio(self, v: Decimal) -> float:
+        """Serializa Decimal a float para JSON"""
+        return float(v)
