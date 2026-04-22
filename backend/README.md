@@ -15,7 +15,7 @@ El proyecto sigue una **arquitectura por capas** con clara separación de respon
 
 ### Capas
 
-1. **Routers** (`app/routers/`): 
+1. **Routers** (`app/routers/`):  
    - Manejan HTTP (request/response)
    - Validan parámetros con `Annotated`, `Query`, `Path`
    - Delegan toda la lógica a los servicios

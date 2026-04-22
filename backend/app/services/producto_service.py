@@ -36,28 +36,41 @@ class ProductoService:
                     detail="Producto ya existe"
                 )
 
-            # Validar que todas las categorías existan
+            # Crear objeto Producto directamente (sin pasar schema)
+            producto = Producto(
+                nombre=producto_data.nombre,
+                descripcion=producto_data.descripcion,
+                precio=producto_data.precio,
+                disponible=producto_data.disponible,
+            )
+            uow.productos.create(producto)
+            uow.flush()  # obtener ID asignado por la BD
+
+            # Asociar categorías — una por una, validando existencia
             for cat_id in producto_data.categoria_ids:
-                if not uow.productos.get_categoria_by_id(cat_id):
+                cat = uow.productos.get_categoria_by_id(cat_id)
+                if not cat:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Categoría con ID {cat_id} no encontrada"
+                        detail=f"Categoría con ID {cat_id} no encontrada",
                     )
+                uow.productos.add_categoria(producto.id, cat_id)
 
-            # Validar que todos los ingredientes existan
-            for ing_data in producto_data.ingredientes:
-                if not uow.productos.get_ingrediente_by_id(ing_data.ingrediente_id):
+            # Asociar ingredientes — uno por uno, validando existencia
+            for ing_input in producto_data.ingredientes:
+                ing = uow.productos.get_ingrediente_by_id(ing_input.ingrediente_id)
+                if not ing:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Ingrediente con ID {ing_data.ingrediente_id} no encontrado"
+                        detail=f"Ingrediente con ID {ing_input.ingrediente_id} no encontrado",
                     )
+                uow.productos.add_ingrediente(producto.id, ing_input.ingrediente_id, ing_input.cantidad)
 
-            # Crear producto y relaciones en una sola transacción
-            producto = uow.productos.create(producto_data)
-            uow.session.flush()  # obtener el id antes de crear relaciones
-            uow.productos.assign_categorias(producto.id, producto_data.categoria_ids)
-            uow.productos.assign_ingredientes(producto.id, producto_data.ingredientes)
-            uow.session.flush()  # para que build_producto_read pueda leer las relaciones
+            uow.flush()
+            uow.refresh(producto)
+            # Forzar carga de relaciones dentro del contexto de la sesión
+            _ = producto.categorias
+            _ = producto.ingredientes
             return uow.productos.build_producto_read(producto)
 
     def update(self, producto_id: int, producto_data: ProductoUpdate) -> ProductoRead:
@@ -75,26 +88,38 @@ class ProductoService:
                     detail="Ya existe otro producto con ese nombre"
                 )
 
-            for cat_id in producto_data.categoria_ids:
-                if not uow.productos.get_categoria_by_id(cat_id):
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Categoría con ID {cat_id} no encontrada"
-                    )
-            for ing_data in producto_data.ingredientes:
-                if not uow.productos.get_ingrediente_by_id(ing_data.ingrediente_id):
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Ingrediente con ID {ing_data.ingrediente_id} no encontrado"
-                    )
-
+            # Actualizar campos del producto
             uow.productos.update(producto, producto_data)
+
+            # Limpiar relaciones anteriores
             uow.productos.clear_categorias(producto_id)
             uow.productos.clear_ingredientes(producto_id)
-            uow.session.flush()
-            uow.productos.assign_categorias(producto_id, producto_data.categoria_ids)
-            uow.productos.assign_ingredientes(producto_id, producto_data.ingredientes)
-            uow.session.flush()
+            uow.flush()
+
+            # Reasociar categorías — una por una, validando existencia
+            for cat_id in producto_data.categoria_ids:
+                cat = uow.productos.get_categoria_by_id(cat_id)
+                if not cat:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Categoría con ID {cat_id} no encontrada",
+                    )
+                uow.productos.add_categoria(producto_id, cat_id)
+
+            # Reasociar ingredientes — uno por uno, validando existencia
+            for ing_input in producto_data.ingredientes:
+                ing = uow.productos.get_ingrediente_by_id(ing_input.ingrediente_id)
+                if not ing:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Ingrediente con ID {ing_input.ingrediente_id} no encontrado",
+                    )
+                uow.productos.add_ingrediente(producto_id, ing_input.ingrediente_id, ing_input.cantidad)
+
+            uow.flush()
+            uow.refresh(producto)
+            _ = producto.categorias
+            _ = producto.ingredientes
             return uow.productos.build_producto_read(producto)
 
     def delete(self, producto_id: int) -> None:

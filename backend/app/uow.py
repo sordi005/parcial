@@ -29,6 +29,14 @@ class UnitOfWork:
             self.session.commit()
         self.session.close()
 
+    def flush(self):
+        """Envía los cambios pendientes a la BD sin hacer commit."""
+        self.session.flush()
+
+    def refresh(self, instance):
+        """Recarga el objeto desde la BD para leer relaciones actualizadas."""
+        self.session.refresh(instance)
+
 
 def get_uow() -> UnitOfWork:
     """Dependency para obtener un UnitOfWork. Para usar con Depends()."""
