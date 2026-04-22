@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from app.models.producto import Producto
 from app.models.categoria import Categoria, ProductoCategoria
 from app.models.ingrediente import Ingrediente, ProductoIngrediente
-from app.schemas.producto import ProductoCreate, ProductoUpdate, ProductoRead, ProductoIngredienteRead, ProductoIngredienteInput
+from app.schemas.producto import ProductoUpdate, ProductoRead, ProductoIngredienteRead, ProductoIngredienteInput
 from app.schemas.categoria import CategoriaRead
 
 
@@ -45,13 +45,7 @@ class ProductoRepository:
             )
         ).first()
 
-    def create(self, producto_data: ProductoCreate) -> Producto:
-        producto = Producto(
-            nombre=producto_data.nombre,
-            descripcion=producto_data.descripcion,
-            precio=producto_data.precio,
-            disponible=producto_data.disponible
-        )
+    def create(self, producto: Producto) -> Producto:
         self.session.add(producto)
         return producto
 
@@ -65,6 +59,25 @@ class ProductoRepository:
 
     def delete(self, producto: Producto) -> None:
         self.session.delete(producto)
+
+    def add_categoria(self, producto_id: int, categoria_id: int) -> ProductoCategoria:
+        link = ProductoCategoria(
+            producto_id=producto_id,
+            categoria_id=categoria_id,
+        )
+        self.session.add(link)
+        self.session.flush()
+        return link
+
+    def add_ingrediente(self, producto_id: int, ingrediente_id: int, cantidad: float) -> ProductoIngrediente:
+        link = ProductoIngrediente(
+            producto_id=producto_id,
+            ingrediente_id=ingrediente_id,
+            cantidad=cantidad,
+        )
+        self.session.add(link)
+        self.session.flush()
+        return link
 
     def assign_categorias(self, producto_id: int, categoria_ids: List[int]) -> None:
         for cat_id in categoria_ids:
