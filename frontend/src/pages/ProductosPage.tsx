@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProductos, useCreateProducto, useUpdateProducto, useDeleteProducto } from '../hooks/useProductos';
 import { useCategorias } from '../hooks/useCategorias';
 import { ProductoModal } from '../components/productos/ProductoModal';
-import { ProductoCard } from '../components/productos/ProductoCard';
 import type { ProductoCreate, ProductoUpdate } from '../types';
 
 export const ProductosPage = () => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProductoId, setSelectedProductoId] = useState<number | null>(null);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState<number | undefined>();
@@ -103,16 +104,69 @@ export const ProductosPage = () => {
       {isLoading ? (
         <div className="text-center text-gray-500 py-8">Cargando productos...</div>
       ) : productos && productos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {productos.map((producto) => (
-            <ProductoCard
-              key={producto.id}
-              producto={producto}
-              onEdit={() => handleOpenModal(producto.id)}
-              onDelete={() => handleDelete(producto.id)}
-              isDeleting={deleteMutation.isPending}
-            />
-          ))}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-100 border-b border-gray-200">
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">ID</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Precio</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Disponible</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Categorías</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Ingredientes</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productos.map((producto) => (
+                <tr key={producto.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  <td className="px-6 py-3 text-gray-900">{producto.id}</td>
+                  <td className="px-6 py-3 text-gray-900 font-medium">{producto.nombre}</td>
+                  <td className="px-6 py-3 text-gray-900">
+                    ${Number(producto.precio).toFixed(2)}
+                  </td>
+                  <td className="px-6 py-3">
+                    <span className={`inline-block px-3 py-1 rounded text-sm font-medium ${
+                      producto.disponible
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {producto.disponible ? 'Sí' : 'No'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {producto.categorias.length > 0
+                      ? producto.categorias.map((c) => c.nombre).join(', ')
+                      : '-'}
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {producto.ingredientes.length}
+                  </td>
+                  <td className="px-6 py-3 space-x-2">
+                    <button
+                      onClick={() => navigate(`/productos/${producto.id}`)}
+                      className="text-purple-600 hover:text-purple-800 font-medium"
+                    >
+                      Ver
+                    </button>
+                    <button
+                      onClick={() => handleOpenModal(producto.id)}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(producto.id)}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">

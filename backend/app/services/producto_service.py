@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import HTTPException, status
 from app.uow import UnitOfWork
 from app.schemas.producto import ProductoCreate, ProductoUpdate, ProductoRead
+from app.models.producto import Producto
 
 
 class ProductoService:

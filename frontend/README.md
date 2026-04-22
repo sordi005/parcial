@@ -1,73 +1,55 @@
-# React + TypeScript + Vite
+# Frontend — Food Store
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz web del sistema de gestión de productos, categorías e ingredientes. Desarrollada con React, TypeScript y TanStack Query para el manejo del estado del servidor.
 
-Currently, two official plugins are available:
+## Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 18** con **TypeScript** — componentes funcionales tipados
+- **Vite** — bundler y servidor de desarrollo
+- **TanStack Query** — manejo de estado del servidor (fetching, caché, mutaciones)
+- **React Router DOM** — navegación SPA con rutas dinámicas
+- **Tailwind CSS 4** — estilos con clases de utilidad
 
-## React Compiler
+## Cómo correr el proyecto
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La app queda disponible en http://localhost:5173
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Estructura
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── api/
+│   └── client.ts          # instancia de axios con la base URL del backend
+├── hooks/
+│   ├── useCategorias.ts   # useQuery + useMutation para categorías
+│   ├── useIngredientes.ts # useQuery + useMutation para ingredientes
+│   └── useProductos.ts    # useQuery + useMutation para productos
+├── pages/
+│   ├── CategoriasPage.tsx
+│   ├── IngredientesPage.tsx
+│   ├── ProductosPage.tsx
+│   └── ProductoDetallePage.tsx
+├── components/
+│   ├── layout/Header.tsx
+│   ├── categorias/        # CategoriaModal, CategoriaForm
+│   ├── ingredientes/      # IngredienteModal, IngredienteForm
+│   └── productos/         # ProductoModal, ProductoForm
+├── types/                 # interfaces TypeScript por módulo
+└── App.tsx                # configuración de rutas
+```
+
+## Cómo funciona
+
+Cada módulo (Categorías, Ingredientes, Productos) tiene:
+- Una **página** con tabla, botones de editar/eliminar y botón de crear
+- Un **modal** que abre el formulario de alta o edición
+- Un **hook** que encapsula toda la comunicación con la API
+
+El hook usa `useQuery` para traer los datos y `useMutation` para crear, editar o eliminar. Después de cada mutación se llama `invalidateQueries` para que la tabla se refresque automáticamente sin recargar la página.
+
+La navegación usa `NavLink` para resaltar la sección activa en el header, y `useParams` en el detalle de producto para leer el ID de la URL (`/productos/:id`).
