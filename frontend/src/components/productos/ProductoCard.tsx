@@ -10,8 +10,8 @@ interface Props {
 
 export const ProductoCard = ({ producto, onEdit, onDelete, isDeleting = false }: Props) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="p-4">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="text-lg font-bold text-gray-900">{producto.nombre}</h3>
@@ -29,9 +29,10 @@ export const ProductoCard = ({ producto, onEdit, onDelete, isDeleting = false }:
         </div>
 
         <div className="my-3">
-          <p className="text-2xl font-bold text-blue-600">${producto.precio.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-blue-600">${typeof producto.precio === 'string' ? parseFloat(producto.precio).toFixed(2) : producto.precio.toFixed(2)}</p>
         </div>
 
+        <div className="flex-1">
         {producto.categorias.length > 0 && (
           <div className="mb-3">
             <p className="text-xs font-semibold text-gray-600 mb-1">Categorías:</p>
@@ -62,8 +63,9 @@ export const ProductoCard = ({ producto, onEdit, onDelete, isDeleting = false }:
             </div>
           </div>
         )}
+        </div>
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-4 ">
           <Link
             to={`/productos/${producto.id}`}
             className="flex-1 text-center bg-blue-50 text-blue-600 px-3 py-2 rounded hover:bg-blue-100 transition-colors font-medium text-sm"

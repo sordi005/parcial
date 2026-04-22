@@ -3,7 +3,8 @@
 ## 🚀 Inicio Rápido
 
 ### Requisitos
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm (o npm/yarn)
 - Backend ejecutándose en `http://localhost:8000`
 
@@ -83,17 +84,19 @@ frontend/
 ## 🔌 Integración con Backend
 
 ### API Base URL
-El frontend está configurado para conectarse a `http://localhost:8000/api/v1`
+
+El frontend está configurado para conectarse a `http://localhost:8000/api`
 
 Para cambiar la URL, edita `src/api/client.ts`:
 
 ```typescript
 export const apiClient = axios.create({
-  baseURL: 'http://tu-servidor:puerto/api/v1', // ← Cambiar aquí
+  baseURL: "http://tu-servidor:puerto/api", // ← Cambiar aquí
 });
 ```
 
 ### Endpoints Esperados
+
 Según el contrato en `docs/API_CONTRACT.md`:
 
 - `GET /categorias` - Listar categorías
@@ -116,17 +119,21 @@ Según el contrato en `docs/API_CONTRACT.md`:
 ## 🧪 Testing Manual
 
 ### 1. Verificar que el backend está activo
+
 ```bash
 curl http://localhost:8000/docs
 ```
+
 Deberías ver la documentación automática de FastAPI.
 
 ### 2. Iniciar el frontend
+
 ```bash
 pnpm run dev
 ```
 
 ### 3. Probar Categorías
+
 1. Navega a `/categorias`
 2. Haz click en "+ Nueva Categoría"
 3. Completa el formulario (nombre requerido, descripción opcional)
@@ -135,6 +142,7 @@ pnpm run dev
 6. Prueba editar y eliminar
 
 ### 4. Probar Ingredientes
+
 1. Navega a `/ingredientes`
 2. Haz click en "+ Nuevo Ingrediente"
 3. Completa:
@@ -145,6 +153,7 @@ pnpm run dev
 4. El stock se muestra en rojo si está por debajo del mínimo
 
 ### 5. Probar Productos (lo más complejo)
+
 1. Navega a `/productos`
 2. Asegúrate de tener al menos 1 categoría e 1 ingrediente creados
 3. Haz click en "+ Nuevo Producto"
@@ -161,6 +170,7 @@ pnpm run dev
 ## 🎨 Características Principales
 
 ### ✅ Completado
+
 - [x] Gestión completa de Categorías (CRUD)
 - [x] Gestión completa de Ingredientes (CRUD)
 - [x] Gestión completa de Productos (CRUD)
@@ -192,16 +202,20 @@ pnpm run dev
 ## 🔧 Troubleshooting
 
 ### Frontend no se conecta al backend
+
 ```
 ECONNREFUSED localhost:8000
 ```
+
 - Verifica que el backend esté corriendo en `http://localhost:8000`
 - Revisa la consola del navegador (F12) para ver el error exacto
 
 ### Error "CORS"
+
 El backend debe tener CORS habilitado para `http://localhost:5173`
 
 En FastAPI (backend/app/main.py):
+
 ```python
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -215,6 +229,7 @@ app.add_middleware(
 ```
 
 ### Formulario no responde
+
 - Verifica en la consola que no hay errores de validación
 - Intenta recargar la página (Ctrl+R)
 - Verifica que el backend retorna la respuesta esperada
