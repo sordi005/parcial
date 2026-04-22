@@ -1,13 +1,13 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from fastapi import APIRouter, Query, Path, Depends, status
 from app.uow import UnitOfWork, get_uow
 from app.services.producto_service import ProductoService
-from app.schemas.producto import ProductoCreate, ProductoRead, ProductoUpdate, ProductoListResponse
+from app.schemas.producto import ProductoCreate, ProductoRead, ProductoUpdate
 
 router = APIRouter(prefix="/api/productos", tags=["productos"])
 
 
-@router.get("", response_model=ProductoListResponse)
+@router.get("", response_model=List[ProductoRead])
 def get_productos(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 100,
