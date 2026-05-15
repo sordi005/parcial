@@ -9,8 +9,8 @@ export const ProductoDetallePage = () => {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           Error: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       </div>
@@ -19,78 +19,90 @@ export const ProductoDetallePage = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center text-gray-500">Cargando...</div>
+      <div className="flex items-center justify-center py-24">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!producto) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center text-gray-500">Producto no encontrado</div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <p className="text-gray-500 font-medium">Producto no encontrado</p>
+        <button onClick={() => navigate('/productos')} className="mt-4 text-sm text-blue-600 hover:underline">
+          ← Volver a Productos
+        </button>
       </div>
     );
   }
 
+  const precio = typeof producto.precio === 'string' ? parseFloat(producto.precio) : producto.precio;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Breadcrumb */}
       <button
         onClick={() => navigate('/productos')}
-        className="text-blue-600 hover:text-blue-800 font-medium mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6 group"
       >
-        ← Volver a Productos
+        <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver a Productos
       </button>
 
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <div className="flex justify-between items-start mb-6">
+      {/* Hero card */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">{producto.nombre}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{producto.nombre}</h1>
             {producto.descripcion && (
-              <p className="text-lg text-gray-600 mt-2">{producto.descripcion}</p>
+              <p className="text-gray-500 mt-2 text-base">{producto.descripcion}</p>
             )}
+            <p className="text-xs text-gray-400 mt-3">
+              Creado el {new Date(producto.created_at).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <span className={`text-lg font-semibold px-4 py-2 rounded ${
+          <span className={`self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border whitespace-nowrap ${
             producto.disponible
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-gray-50 text-gray-500 border-gray-200'
           }`}>
-            {producto.disponible ? '✓ Disponible' : '✗ No disponible'}
+            <span className={`w-1.5 h-1.5 rounded-full ${producto.disponible ? 'bg-green-500' : 'bg-gray-400'}`} />
+            {producto.disponible ? 'Disponible' : 'No disponible'}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div className="bg-blue-50 rounded-lg p-6">
-            <p className="text-sm font-semibold text-gray-600 mb-2">PRECIO</p>
-            <p className="text-4xl font-bold text-blue-600">${typeof producto.precio === 'string' ? parseFloat(producto.precio).toFixed(2) : producto.precio.toFixed(2)}</p>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          <div className="text-center p-4 bg-blue-50 rounded-xl">
+            <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-1">Precio</p>
+            <p className="text-2xl font-bold text-blue-700">${precio.toFixed(2)}</p>
           </div>
-
-          <div className="bg-purple-50 rounded-lg p-6">
-            <p className="text-sm font-semibold text-gray-600 mb-2">CATEGORÍAS</p>
-            <p className="text-2xl font-bold text-purple-600">{producto.categorias.length}</p>
+          <div className="text-center p-4 bg-purple-50 rounded-xl">
+            <p className="text-xs font-semibold text-purple-500 uppercase tracking-wider mb-1">Categorías</p>
+            <p className="text-2xl font-bold text-purple-700">{producto.categorias.length}</p>
           </div>
-
-          <div className="bg-green-50 rounded-lg p-6">
-            <p className="text-sm font-semibold text-gray-600 mb-2">INGREDIENTES</p>
-            <p className="text-2xl font-bold text-green-600">{producto.ingredientes.length}</p>
+          <div className="text-center p-4 bg-emerald-50 rounded-xl">
+            <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider mb-1">Ingredientes</p>
+            <p className="text-2xl font-bold text-emerald-700">{producto.ingredientes.length}</p>
           </div>
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Categorías */}
         {producto.categorias.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Categorías</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-500 inline-block" />
+              Categorías
+            </h2>
             <div className="flex flex-wrap gap-2">
               {producto.categorias.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium"
-                >
+                <span key={cat.id} className="px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-lg font-medium border border-purple-100">
                   {cat.nombre}
-                  {cat.descripcion && (
-                    <p className="text-xs text-blue-700 mt-1">{cat.descripcion}</p>
-                  )}
-                </div>
+                </span>
               ))}
             </div>
           </div>
@@ -98,26 +110,26 @@ export const ProductoDetallePage = () => {
 
         {/* Ingredientes */}
         {producto.ingredientes.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Ingredientes</h2>
-            <div className="bg-gray-50 rounded-lg overflow-hidden">
-              <table className="w-full">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+              Ingredientes
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-200 border-b border-gray-300">
-                    <th className="px-6 py-3 text-left font-semibold text-gray-800">Ingrediente</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-800">Cantidad</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-800">Unidad</th>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2">Ingrediente</th>
+                    <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2">Cantidad</th>
+                    <th className="text-right text-xs font-semibold text-gray-400 uppercase tracking-wider pb-2">Unidad</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-50">
                   {producto.ingredientes.map((ing) => (
-                    <tr
-                      key={ing.ingrediente_id}
-                      className="border-b border-gray-200 hover:bg-gray-100"
-                    >
-                      <td className="px-6 py-3 text-gray-900 font-medium">{ing.nombre}</td>
-                      <td className="px-6 py-3 text-gray-900">{ing.cantidad}</td>
-                      <td className="px-6 py-3 text-gray-600">{ing.unidad_medida}</td>
+                    <tr key={ing.ingrediente_id}>
+                      <td className="py-2.5 font-medium text-gray-800">{ing.nombre}</td>
+                      <td className="py-2.5 text-right text-gray-600">{ing.cantidad}</td>
+                      <td className="py-2.5 text-right text-gray-400">{ing.unidad_medida}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -125,10 +137,6 @@ export const ProductoDetallePage = () => {
             </div>
           </div>
         )}
-
-        <div className="text-sm text-gray-500">
-          Creado: {new Date(producto.created_at).toLocaleDateString()}
-        </div>
       </div>
     </div>
   );

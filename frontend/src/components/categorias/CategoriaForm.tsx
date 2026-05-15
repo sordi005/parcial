@@ -9,7 +9,8 @@ interface Props {
 }
 
 export const CategoriaForm = ({ onSubmit, initialData, isLoading = false }: Props) => {
-  const { data: categorias } = useCategorias();
+  const { list } = useCategorias();
+  const { data: categorias } = list;
   const [nombre, setNombre] = useState(initialData?.nombre || '');
   const [descripcion, setDescripcion] = useState(initialData?.descripcion || '');
   /** '' = categoría raíz */
