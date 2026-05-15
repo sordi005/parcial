@@ -1,0 +1,17 @@
+# Media y archivos grandes
+docs/
+*.mp4
+*.zip
+*.pdf
+*.mp3
+
+# Archivos sueltos
+Drive del video.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
