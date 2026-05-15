@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 from sqlmodel import Session, select
 from app.models.producto import Producto
@@ -14,34 +15,51 @@ class ProductoRepository:
         self.session = session
 
     def get_all(self, skip: int = 0, limit: int = 100, categoria_id: Optional[int] = None) -> List[Producto]:
-        query = select(Producto)
+        query = select(Producto).where(Producto.deleted_at.is_(None))
         if categoria_id:
-            query = query.join(ProductoCategoria).where(
-                ProductoCategoria.categoria_id == categoria_id
+            query = (
+                query.join(ProductoCategoria)
+                .join(Categoria, ProductoCategoria.categoria_id == Categoria.id)
+                .where(
+                    ProductoCategoria.categoria_id == categoria_id,
+                    Categoria.deleted_at.is_(None),
+                )
             )
         return self.session.exec(query.offset(skip).limit(limit)).all()
 
     def count(self, categoria_id: Optional[int] = None) -> int:
-        query = select(Producto)
+        query = select(Producto).where(Producto.deleted_at.is_(None))
         if categoria_id:
-            query = query.join(ProductoCategoria).where(
-                ProductoCategoria.categoria_id == categoria_id
+            query = (
+                query.join(ProductoCategoria)
+                .join(Categoria, ProductoCategoria.categoria_id == Categoria.id)
+                .where(
+                    ProductoCategoria.categoria_id == categoria_id,
+                    Categoria.deleted_at.is_(None),
+                )
             )
         return len(self.session.exec(query).all())
 
     def get_by_id(self, producto_id: int) -> Optional[Producto]:
-        return self.session.get(Producto, producto_id)
+        producto = self.session.get(Producto, producto_id)
+        if producto and producto.deleted_at is not None:
+            return None
+        return producto
 
     def get_by_nombre(self, nombre: str) -> Optional[Producto]:
         return self.session.exec(
-            select(Producto).where(Producto.nombre == nombre)
+            select(Producto).where(
+                Producto.nombre == nombre,
+                Producto.deleted_at.is_(None)
+            )
         ).first()
 
     def get_by_nombre_excluding(self, nombre: str, exclude_id: int) -> Optional[Producto]:
         return self.session.exec(
             select(Producto).where(
                 Producto.nombre == nombre,
-                Producto.id != exclude_id
+                Producto.id != exclude_id,
+                Producto.deleted_at.is_(None)
             )
         ).first()
 
@@ -56,6 +74,10 @@ class ProductoRepository:
         producto.disponible = producto_data.disponible
         self.session.add(producto)
         return producto
+
+    def soft_delete(self, producto: Producto) -> None:
+        producto.deleted_at = datetime.now(timezone.utc)
+        self.session.add(producto)
 
     def delete(self, producto: Producto) -> None:
         self.session.delete(producto)
@@ -106,23 +128,35 @@ class ProductoRepository:
             self.session.delete(rel)
 
     def get_categoria_by_id(self, categoria_id: int) -> Optional[Categoria]:
-        return self.session.get(Categoria, categoria_id)
+        categoria = self.session.get(Categoria, categoria_id)
+        if categoria and categoria.deleted_at is not None:
+            return None
+        return categoria
 
     def get_ingrediente_by_id(self, ingrediente_id: int) -> Optional[Ingrediente]:
-        return self.session.get(Ingrediente, ingrediente_id)
+        ingrediente = self.session.get(Ingrediente, ingrediente_id)
+        if ingrediente and ingrediente.deleted_at is not None:
+            return None
+        return ingrediente
 
     def build_producto_read(self, producto: Producto) -> ProductoRead:
         """Construye el schema ProductoRead con todas las relaciones."""
         categorias = self.session.exec(
             select(Categoria)
             .join(ProductoCategoria)
-            .where(ProductoCategoria.producto_id == producto.id)
+            .where(
+                ProductoCategoria.producto_id == producto.id,
+                Categoria.deleted_at.is_(None),
+            )
         ).all()
 
         ingredientes_raw = self.session.exec(
             select(Ingrediente, ProductoIngrediente.cantidad)
             .join(ProductoIngrediente)
-            .where(ProductoIngrediente.producto_id == producto.id)
+            .where(
+                ProductoIngrediente.producto_id == producto.id,
+                Ingrediente.deleted_at.is_(None),
+            )
         ).all()
 
         ingredientes = [
@@ -142,6 +176,16 @@ class ProductoRepository:
             precio=producto.precio,
             disponible=producto.disponible,
             created_at=producto.created_at,
-            categorias=[CategoriaRead.model_validate(cat) for cat in categorias],
+            categorias=[
+                CategoriaRead(
+                    id=cat.id,
+                    nombre=cat.nombre,
+                    descripcion=cat.descripcion,
+                    parent_id=cat.parent_id,
+                    created_at=cat.created_at,
+                    subcategorias=[],
+                )
+                for cat in categorias
+            ],
             ingredientes=ingredientes
         )
