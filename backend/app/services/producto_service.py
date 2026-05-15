@@ -133,4 +133,4 @@ class ProductoService:
                 )
             uow.productos.clear_categorias(producto_id)
             uow.productos.clear_ingredientes(producto_id)
-            uow.productos.delete(producto)
+            uow.productos.soft_delete(producto)

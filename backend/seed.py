@@ -121,7 +121,10 @@ def seed_categorias(session: Session) -> dict[str, Categoria]:
     resultado = {}
     for data in CATEGORIAS:
         existing = session.exec(
-            select(Categoria).where(Categoria.nombre == data["nombre"])
+            select(Categoria).where(
+                Categoria.nombre == data["nombre"],
+                Categoria.deleted_at.is_(None),
+            )
         ).first()
 
         if existing:
@@ -142,7 +145,10 @@ def seed_ingredientes(session: Session) -> dict[str, Ingrediente]:
     resultado = {}
     for data in INGREDIENTES:
         existing = session.exec(
-            select(Ingrediente).where(Ingrediente.nombre == data["nombre"])
+            select(Ingrediente).where(
+                Ingrediente.nombre == data["nombre"],
+                Ingrediente.deleted_at.is_(None),
+            )
         ).first()
 
         if existing:
@@ -166,7 +172,10 @@ def seed_productos(
     """Inserta productos con sus relaciones"""
     for data in PRODUCTOS:
         existing = session.exec(
-            select(Producto).where(Producto.nombre == data["nombre"])
+            select(Producto).where(
+                Producto.nombre == data["nombre"],
+                Producto.deleted_at.is_(None),
+            )
         ).first()
 
         if existing:
