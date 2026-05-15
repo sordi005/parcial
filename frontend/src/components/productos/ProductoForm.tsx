@@ -10,8 +10,10 @@ interface Props {
 }
 
 export const ProductoForm = ({ onSubmit, initialData, isLoading = false }: Props) => {
-  const { data: ingredientesData } = useIngredientes();
-  const { data: categoriasData } = useCategorias();
+  const { list: ingredientesList } = useIngredientes();
+  const { list: categoriasList } = useCategorias();
+  const { data: ingredientesData } = ingredientesList;
+  const { data: categoriasData } = categoriasList;
 
   const [nombre, setNombre] = useState(initialData?.nombre || '');
   const [descripcion, setDescripcion] = useState(initialData?.descripcion || '');

@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useProducto } from '../hooks/useProductos';
+import { useProductos } from '../hooks/useProductos';
 
 export const ProductoDetallePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: producto, isLoading, error } = useProducto(id ? parseInt(id) : undefined);
+  const { detail } = useProductos(undefined, id ? parseInt(id) : undefined);
+  const { data: producto, isLoading, error } = detail;
 
   if (error) {
     return (

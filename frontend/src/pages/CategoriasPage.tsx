@@ -1,37 +1,40 @@
 import { useState } from 'react';
-import { useCategorias, useCreateCategoria, useUpdateCategoria, useDeleteCategoria } from '../hooks/useCategorias';
+import { useCategorias } from '../hooks/useCategorias';
 import { CategoriaModal } from '../components/categorias/CategoriaModal';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Toast } from '../components/ui/Toast';
 import type { CategoriaCreate, CategoriaUpdate } from '../types';
 
 export const CategoriasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
-  const { data: categorias, isLoading, error } = useCategorias();
-  const createMutation = useCreateCategoria();
-  const updateMutation = useUpdateCategoria();
-  const deleteMutation = useDeleteCategoria();
+  const { list, create, update, remove } = useCategorias();
+  const { data: categorias, isLoading, error } = list;
 
   const selectedCategoria = categorias?.find((c) => c.id === selectedCategoriaId);
 
   const handleCreate = async (formData: CategoriaCreate | CategoriaUpdate) => {
     if (selectedCategoriaId) {
-      await updateMutation.mutateAsync({
+      await update.mutateAsync({
         id: selectedCategoriaId,
         data: formData as CategoriaUpdate,
       });
     } else {
-      await createMutation.mutateAsync(formData as CategoriaCreate);
+      await create.mutateAsync(formData as CategoriaCreate);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (err) {
-        alert(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-      }
+  const handleDeleteConfirm = async () => {
+    if (!confirmId) return;
+    try {
+      await remove.mutateAsync(confirmId);
+      setConfirmId(null);
+    } catch (err) {
+      setConfirmId(null);
+      setToast({ message: err instanceof Error ? err.message : 'Error desconocido', type: 'error' });
     }
   };
 
@@ -96,9 +99,8 @@ export const CategoriasPage = () => {
                       Editar
                     </button>
                     <button
-                      onClick={() => handleDelete(categoria.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400"
+                      onClick={() => setConfirmId(categoria.id)}
+                      className="text-red-600 hover:text-red-800 font-medium"
                     >
                       Eliminar
                     </button>
@@ -119,6 +121,23 @@ export const CategoriasPage = () => {
           onClose={handleCloseModal}
           onSubmit={handleCreate}
           initialData={selectedCategoria}
+        />
+      )}
+
+      {confirmId && (
+        <ConfirmDialog
+          message="¿Estás seguro de que deseas eliminar esta categoría?"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmId(null)}
+          isPending={remove.isPending}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

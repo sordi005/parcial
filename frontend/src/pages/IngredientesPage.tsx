@@ -1,37 +1,40 @@
 import { useState } from 'react';
-import { useIngredientes, useCreateIngrediente, useUpdateIngrediente, useDeleteIngrediente } from '../hooks/useIngredientes';
+import { useIngredientes } from '../hooks/useIngredientes';
 import { IngredienteModal } from '../components/ingredientes/IngredienteModal';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Toast } from '../components/ui/Toast';
 import type { IngredienteCreate, IngredienteUpdate } from '../types';
 
 export const IngredientesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIngredienteId, setSelectedIngredienteId] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
-  const { data: ingredientes, isLoading, error } = useIngredientes();
-  const createMutation = useCreateIngrediente();
-  const updateMutation = useUpdateIngrediente();
-  const deleteMutation = useDeleteIngrediente();
+  const { list, create, update, remove } = useIngredientes();
+  const { data: ingredientes, isLoading, error } = list;
 
   const selectedIngrediente = ingredientes?.find((i) => i.id === selectedIngredienteId);
 
   const handleCreate = async (formData: IngredienteCreate | IngredienteUpdate) => {
     if (selectedIngredienteId) {
-      await updateMutation.mutateAsync({
+      await update.mutateAsync({
         id: selectedIngredienteId,
         data: formData as IngredienteUpdate,
       });
     } else {
-      await createMutation.mutateAsync(formData as IngredienteCreate);
+      await create.mutateAsync(formData as IngredienteCreate);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este ingrediente?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (err) {
-        alert(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-      }
+  const handleDeleteConfirm = async () => {
+    if (!confirmId) return;
+    try {
+      await remove.mutateAsync(confirmId);
+      setConfirmId(null);
+    } catch (err) {
+      setConfirmId(null);
+      setToast({ message: err instanceof Error ? err.message : 'Error desconocido', type: 'error' });
     }
   };
 
@@ -106,9 +109,8 @@ export const IngredientesPage = () => {
                       Editar
                     </button>
                     <button
-                      onClick={() => handleDelete(ingrediente.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400"
+                      onClick={() => setConfirmId(ingrediente.id)}
+                      className="text-red-600 hover:text-red-800 font-medium"
                     >
                       Eliminar
                     </button>
@@ -129,6 +131,23 @@ export const IngredientesPage = () => {
           onClose={handleCloseModal}
           onSubmit={handleCreate}
           initialData={selectedIngrediente}
+        />
+      )}
+
+      {confirmId && (
+        <ConfirmDialog
+          message="¿Estás seguro de que deseas eliminar este ingrediente?"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmId(null)}
+          isPending={remove.isPending}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

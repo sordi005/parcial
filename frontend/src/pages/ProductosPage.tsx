@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProductos, useCreateProducto, useUpdateProducto, useDeleteProducto } from '../hooks/useProductos';
+import { useProductos } from '../hooks/useProductos';
 import { useCategorias } from '../hooks/useCategorias';
 import { ProductoModal } from '../components/productos/ProductoModal';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Toast } from '../components/ui/Toast';
 import type { ProductoCreate, ProductoUpdate } from '../types';
 
 export const ProductosPage = () => {
@@ -10,33 +12,35 @@ export const ProductosPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProductoId, setSelectedProductoId] = useState<number | null>(null);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState<number | undefined>();
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
-  const { data: productos, isLoading, error } = useProductos(selectedCategoriaId);
-  const { data: categorias } = useCategorias();
-  const createMutation = useCreateProducto();
-  const updateMutation = useUpdateProducto();
-  const deleteMutation = useDeleteProducto();
+  const { list: productosList, create, update, remove } = useProductos(selectedCategoriaId);
+  const { list: categoriasList } = useCategorias();
+  const { data: productos, isLoading, error } = productosList;
+  const { data: categorias } = categoriasList;
 
   const selectedProducto = productos?.find((p) => p.id === selectedProductoId);
 
   const handleCreate = async (formData: ProductoCreate | ProductoUpdate) => {
     if (selectedProductoId) {
-      await updateMutation.mutateAsync({
+      await update.mutateAsync({
         id: selectedProductoId,
         data: formData as ProductoUpdate,
       });
     } else {
-      await createMutation.mutateAsync(formData as ProductoCreate);
+      await create.mutateAsync(formData as ProductoCreate);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (err) {
-        alert(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-      }
+  const handleDeleteConfirm = async () => {
+    if (!confirmId) return;
+    try {
+      await remove.mutateAsync(confirmId);
+      setConfirmId(null);
+    } catch (err) {
+      setConfirmId(null);
+      setToast({ message: err instanceof Error ? err.message : 'Error desconocido', type: 'error' });
     }
   };
 
@@ -156,9 +160,8 @@ export const ProductosPage = () => {
                       Editar
                     </button>
                     <button
-                      onClick={() => handleDelete(producto.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400"
+                      onClick={() => setConfirmId(producto.id)}
+                      className="text-red-600 hover:text-red-800 font-medium"
                     >
                       Eliminar
                     </button>
@@ -179,6 +182,23 @@ export const ProductosPage = () => {
           onClose={handleCloseModal}
           onSubmit={handleCreate}
           initialData={selectedProducto}
+        />
+      )}
+
+      {confirmId && (
+        <ConfirmDialog
+          message="¿Estás seguro de que deseas eliminar este producto?"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmId(null)}
+          isPending={remove.isPending}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

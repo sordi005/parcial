@@ -11,9 +11,38 @@ API REST para gestión de productos, categorías e ingredientes. Construida con 
 
 ## Cómo correr el proyecto
 
+### 1. Levantar la base de datos con Docker
+
+Desde la raíz del proyecto (donde está el `docker-compose.yml`):
+
+```bash
+docker compose up -d
+```
+
+Esto levanta PostgreSQL en el puerto **5434** con los siguientes datos:
+
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Puerto | `5434` |
+| Usuario | `postgres` |
+| Contraseña | `1234postgres` |
+| Base de datos | `parcial_prog4` |
+
+### 2. Configurar el entorno
+
+El archivo `.env` ya está incluido en `backend/` con la conexión correcta:
+
+```env
+DATABASE_URL=postgresql://postgres:1234postgres@localhost:5434/parcial_prog4
+```
+
+### 3. Instalar dependencias y correr
+
 ```bash
 python -m venv .venv
 .venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # Linux/Mac
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
@@ -21,13 +50,13 @@ uvicorn app.main:app --reload
 La API queda disponible en http://localhost:8000  
 Documentación interactiva en http://localhost:8000/docs
 
-Antes de correr, crear el archivo `.env` en la carpeta `backend/` con la conexión a PostgreSQL:
-
-```env
-DATABASE_URL=postgresql://postgres:tu_password@localhost:5432/parcial_prog4
-```
-
 Las tablas se crean automáticamente al iniciar la app.
+
+### 4. (Opcional) Cargar datos de prueba
+
+```bash
+python seed.py
+```
 
 ## Estructura
 
