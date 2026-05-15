@@ -18,10 +18,7 @@ export const CategoriasPage = () => {
 
   const handleCreate = async (formData: CategoriaCreate | CategoriaUpdate) => {
     if (selectedCategoriaId) {
-      await update.mutateAsync({
-        id: selectedCategoriaId,
-        data: formData as CategoriaUpdate,
-      });
+      await update.mutateAsync({ id: selectedCategoriaId, data: formData as CategoriaUpdate });
     } else {
       await create.mutateAsync(formData as CategoriaCreate);
     }
@@ -38,20 +35,13 @@ export const CategoriasPage = () => {
     }
   };
 
-  const handleOpenModal = (id?: number) => {
-    setSelectedCategoriaId(id || null);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedCategoriaId(null);
-  };
+  const handleOpenModal = (id?: number) => { setSelectedCategoriaId(id || null); setIsModalOpen(true); };
+  const handleCloseModal = () => { setIsModalOpen(false); setSelectedCategoriaId(null); };
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           Error: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       </div>
@@ -59,95 +49,98 @@ export const CategoriasPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Categorías</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Categorías</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {categorias ? `${categorias.length} categoría${categorias.length !== 1 ? 's' : ''} registrada${categorias.length !== 1 ? 's' : ''}` : 'Cargando...'}
+          </p>
+        </div>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+          className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors font-medium shadow-sm text-sm"
         >
-          + Nueva Categoría
+          <span className="text-lg leading-none">+</span>
+          Nueva Categoría
         </button>
       </div>
 
       {isLoading ? (
-        <div className="text-center text-gray-500 py-8">Cargando categorías...</div>
+        <div className="flex items-center justify-center py-16">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : categorias && categorias.length > 0 ? (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-100 border-b border-gray-200">
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">ID</th>
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">Padre</th>
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">Subcats</th>
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">Descripción</th>
-                <th className="px-6 py-3 text-left font-semibold text-gray-700">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categorias.map((categoria) => (
-                <tr key={categoria.id} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="px-6 py-3 text-gray-900">{categoria.id}</td>
-                  <td className="px-6 py-3 text-gray-900 font-medium">{categoria.nombre}</td>
-                  <td className="px-6 py-3 text-gray-600">
-                    {categoria.parent_id ?? '—'}
-                  </td>
-                  <td className="px-6 py-3 text-gray-600">
-                    {categoria.subcategorias?.length ?? 0}
-                  </td>
-                  <td className="px-6 py-3 text-gray-600">
-                    {categoria.descripcion || '-'}
-                  </td>
-                  <td className="px-6 py-3 space-x-2">
-                    <button
-                      onClick={() => handleOpenModal(categoria.id)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => setConfirmId(categoria.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Padre</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Subcats</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripción</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {categorias.map((categoria) => (
+                  <tr key={categoria.id} className="hover:bg-gray-50/70 transition-colors">
+                    <td className="px-4 py-3 text-gray-400 text-xs font-mono">#{categoria.id}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-900">{categoria.nombre}</td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {categorias.find(c => c.id === categoria.parent_id)?.nombre ?? (
+                        <span className="text-gray-300 italic text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
+                        {categoria.subcategorias?.length ?? 0}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 max-w-xs truncate">{categoria.descripcion || <span className="text-gray-300 italic text-xs">—</span>}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleOpenModal(categoria.id)}
+                          className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(categoria.id)}
+                          className="px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-          No hay categorías creadas. ¡Crea una nueva!
+        <div className="bg-white rounded-xl border border-dashed border-gray-300 p-12 text-center">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <p className="text-gray-500 font-medium">No hay categorías todavía</p>
+          <p className="text-gray-400 text-sm mt-1">Creá la primera para empezar a organizar tus productos.</p>
+          <button onClick={() => handleOpenModal()} className="mt-4 text-sm text-blue-600 hover:underline font-medium">
+            + Nueva Categoría
+          </button>
         </div>
       )}
 
-      {isModalOpen && (
-        <CategoriaModal
-          onClose={handleCloseModal}
-          onSubmit={handleCreate}
-          initialData={selectedCategoria}
-        />
-      )}
-
-      {confirmId && (
-        <ConfirmDialog
-          message="¿Estás seguro de que deseas eliminar esta categoría?"
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setConfirmId(null)}
-          isPending={remove.isPending}
-        />
-      )}
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {isModalOpen && <CategoriaModal onClose={handleCloseModal} onSubmit={handleCreate} initialData={selectedCategoria} />}
+      {confirmId && <ConfirmDialog message="¿Estás seguro de que deseas eliminar esta categoría?" onConfirm={handleDeleteConfirm} onCancel={() => setConfirmId(null)} isPending={remove.isPending} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
