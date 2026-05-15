@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CategoriaCreate, CategoriaUpdate, Categoria } from '../../types';
+import { useCategorias } from '../../hooks/useCategorias';
 
 interface Props {
   onSubmit: (data: CategoriaCreate | CategoriaUpdate) => void;
@@ -8,9 +9,20 @@ interface Props {
 }
 
 export const CategoriaForm = ({ onSubmit, initialData, isLoading = false }: Props) => {
+  const { data: categorias } = useCategorias();
   const [nombre, setNombre] = useState(initialData?.nombre || '');
   const [descripcion, setDescripcion] = useState(initialData?.descripcion || '');
+  /** '' = categoría raíz */
+  const [parentId, setParentId] = useState<number | ''>(initialData?.parent_id ?? '');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setNombre(initialData?.nombre || '');
+    setDescripcion(initialData?.descripcion || '');
+    setParentId(initialData?.parent_id ?? '');
+  }, [initialData]);
+
+  const parentOptions = (categorias || []).filter((c) => c.id !== initialData?.id);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +41,7 @@ export const CategoriaForm = ({ onSubmit, initialData, isLoading = false }: Prop
     onSubmit({
       nombre: nombre.trim(),
       descripcion: descripcion.trim() || undefined,
+      parent_id: parentId === '' ? null : parentId,
     });
   };
 
@@ -66,6 +79,27 @@ export const CategoriaForm = ({ onSubmit, initialData, isLoading = false }: Prop
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Categoría padre (opcional)
+        </label>
+        <select
+          value={parentId === '' ? '' : String(parentId)}
+          onChange={(e) =>
+            setParentId(e.target.value === '' ? '' : Number(e.target.value))
+          }
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isLoading}
+        >
+          <option value="">— Raíz (sin padre) —</option>
+          {parentOptions.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
+            </option>
+          ))}
+        </select>
       </div>
 
       <button

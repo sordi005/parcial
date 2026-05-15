@@ -76,6 +76,8 @@ export const CategoriasPage = () => {
               <tr className="bg-gray-100 border-b border-gray-200">
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">ID</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Padre</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Subcats</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Descripción</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Acciones</th>
               </tr>
@@ -85,6 +87,12 @@ export const CategoriasPage = () => {
                 <tr key={categoria.id} className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="px-6 py-3 text-gray-900">{categoria.id}</td>
                   <td className="px-6 py-3 text-gray-900 font-medium">{categoria.nombre}</td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {categoria.parent_id ?? '—'}
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {categoria.subcategorias?.length ?? 0}
+                  </td>
                   <td className="px-6 py-3 text-gray-600">
                     {categoria.descripcion || '-'}
                   </td>

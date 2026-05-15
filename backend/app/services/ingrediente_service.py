@@ -67,4 +67,4 @@ class IngredienteService:
                     status_code=status.HTTP_409_CONFLICT,
                     detail="No se puede eliminar el ingrediente porque tiene productos relacionados"
                 )
-            uow.ingredientes.delete(ingrediente)
+            uow.ingredientes.soft_delete(ingrediente)
